@@ -1,0 +1,139 @@
+#-----------------------------------------------------------
+# Vivado v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Sat Feb 16 10:52:19 2019
+# Process ID: 4540
+# Current directory: H:/lab1
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent4828 H:\lab1\lab1.xpr
+# Log file: H:/lab1/vivado.log
+# Journal file: H:/lab1\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project H:/lab1/lab1.xpr
+update_compile_order -fileset sources_1
+launch_runs synth_1
+wait_on_run synth_1
+launch_runs impl_1
+wait_on_run impl_1
+open_run impl_1
+launch_simulation
+source SourceTestbench.tcl
+synth_design -rtl -name rtl_1
+place_ports l_door M16
+place_ports r_door M15
+place_ports lamp J1
+set_property IOSTANDARD LVCMOS33 [get_ports [list l_door]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list lamp]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list r_door]]
+startgroup
+set_property CONFIG_VOLTAGE 3.3 [get_designs rtl_1]
+set_property CFGBVS VCCO [get_designs rtl_1]
+endgroup
+file mkdir H:/lab1/lab1.srcs/constrs_1/new
+close [ open H:/lab1/lab1.srcs/constrs_1/new/constraints.xdc w ]
+add_files -fileset constrs_1 H:/lab1/lab1.srcs/constrs_1/new/constraints.xdc
+set_property target_constrs_file H:/lab1/lab1.srcs/constrs_1/new/constraints.xdc [current_fileset -constrset]
+save_constraints -force
+reset_run synth_1
+launch_runs synth_1
+wait_on_run synth_1
+launch_runs impl_1
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream
+wait_on_run impl_1
+open_hw
+connect_hw_server
+open_hw_target
+set_property PROGRAM.FILE {H:/lab1/lab1.runs/impl_1/Source.bit} [get_hw_devices xc7a15t_0]
+current_hw_device [get_hw_devices xc7a15t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a15t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a15t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a15t_0]
+set_property PROGRAM.FILE {H:/lab1/lab1.runs/impl_1/Source.bit} [get_hw_devices xc7a15t_0]
+program_hw_devices [get_hw_devices xc7a15t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a15t_0] 0]
+open_run synth_1 -name synth_1
+current_design rtl_1
+set_property PULLTYPE NONE [get_ports [list l_door]]
+set_property PULLTYPE NONE [get_ports [list lamp]]
+set_property PULLTYPE NONE [get_ports [list r_door]]
+set_property SLEW SLOW [get_ports [list lamp]]
+set_property OFFCHIP_TERM NONE [get_ports [list l_door]]
+set_property PULLTYPE NONE [get_ports [list l_door]]
+reset_run synth_1
+save_constraints -force
+launch_runs impl_1
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream
+wait_on_run impl_1
+set_property PROBES.FILE {} [get_hw_devices xc7a15t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a15t_0]
+set_property PROGRAM.FILE {H:/lab1/lab1.runs/impl_1/Source.bit} [get_hw_devices xc7a15t_0]
+program_hw_devices [get_hw_devices xc7a15t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a15t_0] 0]
+reset_run synth_1
+launch_runs synth_1
+wait_on_run synth_1
+current_design synth_1
+close_design
+open_run synth_1 -name synth_1
+reset_run synth_1
+launch_runs synth_1
+wait_on_run synth_1
+close_design
+open_run synth_1 -name synth_1
+current_design rtl_1
+current_design synth_1
+current_design impl_1
+launch_runs impl_1
+wait_on_run impl_1
+refresh_design
+set_property is_loc_fixed false [get_ports [list  l_door]]
+set_property is_loc_fixed false [get_ports [list  lamp]]
+set_property is_loc_fixed false [get_ports [list  r_door]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list light1]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list light2]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[0]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[1]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[2]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[3]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[4]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[5]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[6]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list {lights[7]}]]
+set_property IOSTANDARD LVCMOS33 [get_ports [list toggle]]
+place_ports toggle P15
+place_ports light1 L15
+place_ports light1 T15
+place_ports light2 R15
+place_ports {lights[0]} D1
+place_ports {lights[1]} B4
+place_ports {lights[2]} A7
+place_ports {lights[3]} B9
+place_ports {lights[4]} B14
+place_ports {lights[5]} C14
+place_ports {lights[6]} E16
+place_ports {lights[7]} F15
+set_property is_loc_fixed true [get_ports [list  r_door]]
+set_property is_loc_fixed true [get_ports [list  lamp]]
+set_property is_loc_fixed true [get_ports [list  l_door]]
+save_constraints
+reset_run synth_1
+launch_runs synth_1
+wait_on_run synth_1
+launch_runs impl_1
+wait_on_run impl_1
+refresh_design
+place_ports toggle A7
+save_constraints
+place_ports {lights[7]} A8
+place_ports {lights[5]} A3
+save_constraints -force
+current_design synth_1
+refresh_design
+set_property needs_refresh false [get_runs synth_1]
+set_property needs_refresh false [get_runs impl_1]
+set_property needs_refresh false [get_runs synth_1]
+set_property needs_refresh false [get_runs impl_1]
+close_sim
