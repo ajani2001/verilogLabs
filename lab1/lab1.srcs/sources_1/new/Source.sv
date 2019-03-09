@@ -28,7 +28,7 @@ module Source(
     input toggle,
     input light1,
     input light2,
-    output lights [7:0]
+    output lights[7:0]
     );
     
     assign lights[0] = ~toggle | ~light2;

@@ -22,10 +22,12 @@
 
 module SourceTestbench(
     );
+    
     logic ld, rd, lamp;
-    logic toggle, light1, light2, lights[7:0];
-    Source src(ld,rd,lamp,
-    toggle, light1, light2, lights);
+    logic toggle, light1, light2; 
+    logic [7:0] lights;
+    
+    Source src(.l_door(ld),.r_door(rd),.lamp(lamp),.toggle(toggle),.light1(light1),.light2(light2),.lights(lights));
     
     initial begin
     $display("Running testbench");
@@ -34,27 +36,27 @@ module SourceTestbench(
     toggle = 1;
     light1 = 1;
     light2 = 1;
-    #5 // Задержка в 5 единиц времени
+    #50
     ld = 1; // Открыта левая дверь
-    #2
+    #20
     rd = 1; // Открыта правая дверь
-    #5
+    #50
     ld = 0; // Левую дверь закрыли
-    #1
+    #10
     rd = 0; // Правую дверь закрыли
-    #2
+    #20
     toggle = 0;
-    #5
+    #50
     toggle = 1;
-    #5
+    #50
     light1 = 0;
-    #5
+    #50
     light2 = 0;
-    #5
+    #50
     light1 = 1;
-    #5
+    #50
     light2 = 1;
-    #5
+    #50
     $finish;
     end
     
