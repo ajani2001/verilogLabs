@@ -18,18 +18,23 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+module coolRepeater(input in, output out);
+    (* dont_touch = "true" *)
+    logic [2:0]inv;
+    assign inv[0] = ~in;
+    assign inv[1] = ~inv[0];
+    assign inv[2] = ~inv[1];
+    assign out = ~inv[2];
+endmodule
 
-
-module ModuleChain(
-    input clock,
-    output led[7:0]
-);
-    
+module ModuleChain(input clock, output [7:0] led);    
     (* max_fanout = 2 *) (* dont_touch = "true" *) logic buff[7:0];
+    
     genvar i;
-    assign buff[0] = clock;
-    for (i=0; i<8; i=i+1) begin
-        assign buff[i+1] = buff[i];
+    coolRepeater rep0(.in(clock), .out(buff[0]));
+    for (i=0; i<7; i=i+1) begin
+        coolRepeater rep(.in(buff[i]), .out(buff[i+1]));
         assign led[i] = buff[i]^clock;
     end
+    assign led[7] = buff[7]^clock;
 endmodule

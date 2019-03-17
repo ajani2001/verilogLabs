@@ -24,15 +24,10 @@ module TB();
     logic clock;
     logic [7:0]led;
     
-    ModuleChain test(.clock(clock),.led(led));
+    ModuleChain test(.clock(clock), .led(led));
     initial begin
     $display("running TB");
-    clock=0;
-    #100
-    clock=1;
-    #100
-    clock=0;
-    #100
+    clock = 0;
     $finish;
     end
 endmodule
