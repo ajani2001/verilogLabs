@@ -20,37 +20,23 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Decoder3(input [2:0] dataEncoded, output logic [7:0] dataDecoded, output logic [7:0] segDecoded);
-
-   logic [2:0] logicEncoded = ~dataEncoded;
-
-   genvar i;
-   for (i=0; i < 8; i=i+1)
-   begin
-      assign dataDecoded[i] = (logicEncoded == i);
-   end
+module Decoder3(input [7:0] buttons, output logic [7:0] segDecoded);
+   logic [7:0] buttonsInverted = ~buttons;
    
-   always_comb
-   case(logicEncoded)
-      1'd0 : assign segDecoded = 7'b00111111;
-      1'd1 : assign segDecoded = 7'b00000110;
-      1'd2 : assign segDecoded = 7'b01011011;
-      1'd3 : assign segDecoded = 7'b00111111;
-      1'd4 : segDecoded = 7'b00111111;
-      1'd5 : segDecoded = 7'b00111111;
-      1'd6 : segDecoded = 7'b00111111;
-      1'd7 : segDecoded = 7'b00111111;
-      1'd8 : segDecoded = 7'b00111111;
-      1'd9 : segDecoded = 7'b00111111;
-   endcase
-   /*
-   assign segDecoded[0] = (logicEncoded == 0 || logicEncoded == 2 || logicEncoded == 3 || logicEncoded == 5 || logicEncoded == 6 || logicEncoded == 7);
-   assign segDecoded[1] = (logicEncoded == 0 || logicEncoded == 1 || logicEncoded == 2 || logicEncoded == 3 || logicEncoded == 4 || logicEncoded == 7);
-   assign segDecoded[2] = (logicEncoded == 0 || logicEncoded == 1 || logicEncoded == 3 || logicEncoded == 4 || logicEncoded == 5 || logicEncoded == 6 || logicEncoded == 7);
-   assign segDecoded[3] = (logicEncoded == 0 || logicEncoded == 2 || logicEncoded == 3 || logicEncoded == 5 || logicEncoded == 6);
-   assign segDecoded[4] = (logicEncoded == 0 || logicEncoded == 2 || logicEncoded == 6);
-   assign segDecoded[5] = (logicEncoded == 0 || logicEncoded == 4 || logicEncoded == 5 || logicEncoded == 6);
-   assign segDecoded[6] = (logicEncoded == 2 || logicEncoded == 3 || logicEncoded == 4 || logicEncoded == 5 || logicEncoded == 6);
-   assign segDecoded[7] = 0;
-   */
+   logic [3:0]TMP11;
+   logic [3:0]TMP12;
+   logic [3:0]TMP13;
+   logic [3:0]TMP14;
+   logic [3:0]TMP21;
+   logic [3:0]TMP22;
+   logic [3:0]logicEncoded;
+   sum4bit s11(.lvalue({3'b0,buttons[0]}), .rvalue({3'b0,buttons[1]}), .result(TMP11));
+   sum4bit s12(.lvalue({3'b0,buttons[2]}), .rvalue({3'b0,buttons[3]}), .result(TMP12));
+   sum4bit s13(.lvalue({3'b0,buttons[4]}), .rvalue({3'b0,buttons[5]}), .result(TMP13));
+   sum4bit s14(.lvalue({3'b0,buttons[6]}), .rvalue({3'b0,buttons[7]}), .result(TMP14));
+   sum4bit s21(.lvalue(TMP11), .rvalue(TMP12), .result(TMP21));
+   sum4bit s22(.lvalue(TMP13), .rvalue(TMP14), .result(TMP22));
+   sum4bit result(.lvalue(TMP21), .rvalue(TMP22), .result(logicEncoded));
+   
+   seg7 moduleseg7(.input4bit(logicEncoded), .output7seg(segDecoded));
 endmodule
