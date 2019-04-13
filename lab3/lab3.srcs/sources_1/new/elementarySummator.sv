@@ -27,7 +27,6 @@ module elementarySummator(
     output S,
     output P1
     );
-    always_comb;
     assign S = b1^b2^P;
     assign P1 = (b1&b2)|(P&(b1^b2));
 endmodule
