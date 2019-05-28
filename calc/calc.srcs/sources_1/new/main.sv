@@ -19,16 +19,13 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-task pushNum(input [3:0] num, input reg [3:0] stackSize, inout reg [2:0] currentSize, output reg [15:0] stack [15:0]);
+task pushNum(input [3:0] num, input reg [3:0] stackSize, inout reg [2:0] currentSize, output reg [15:0] stack [15:0], output overflow);
     if(currentSize!=4) begin
-    case(currentSize)
-    0: stack[stackSize][3:0] = num;
-    1: stack[stackSize][7:4] = num;
-    2: stack[stackSize][11:8] = num;
-    3: stack[stackSize][15:12] = num;
-    endcase
+    stack[stackSize] = stack[stackSize]<<4;
+    stack[stackSize][3:0] = num;
     currentSize = currentSize + 1;    
     end
+    else overflow = 1;
 endtask
 
 function[15:0] sumDec(input[15:0] lvalue, rvalue, output overflow);
@@ -73,12 +70,13 @@ module main(input clock, input [3:0] kbdData, output logic [3:0] kbdCtrl, output
     seg7 s3(.input4bit(outputCache[15:12]), .output7seg(seg3));
     always @(posedge clock) begin
         counter125hz <= counter125hz + 1;
-        if(counter125hz[4:3]==2'b11 && actCode) begin
+        if(counter125hz[4:3]==2'b11 && actCode!=0) begin
         case(actCode)
         1: begin
             if(stackSize!=0) begin
                 stack[stackSize-1] = sumDec(.lvalue(stack[stackSize-1]), .rvalue(stack[stackSize]), .overflow(cache[0]));
                 stack[stackSize] = 0;
+                stackSize = stackSize - 1;
                 if(cache[0]==1) actCode = 6;
                 else actCode = 0;
                 cache[0]=0;
@@ -114,9 +112,9 @@ module main(input clock, input [3:0] kbdData, output logic [3:0] kbdCtrl, output
         end
         4: begin
             if(stackSize!=0 && stack[stackSize]!=0) begin
-                if(stack[stackSize-1]>stack[stackSize]) begin
+                if(stack[stackSize-1]>=stack[stackSize]) begin
                     stack[stackSize-1] = subtractDec(.lvalue(stack[stackSize-1]), .rvalue(stack[stackSize]), .overflow(overflow));
-                    cache = cache + 1;
+                    cache = sumDec(.lvalue(cache), .rvalue(1), .overflow(overflow));
                     if(overflow==1) actCode = 6;
                 end
                 else begin
@@ -130,88 +128,91 @@ module main(input clock, input [3:0] kbdData, output logic [3:0] kbdCtrl, output
         end
         5: begin
             stack[stackSize] = 0;
+            currentSize = 0;
             actCode = 0;
         end
         7: begin
             stackSize = stackSize + 1;
+            currentSize = 0;
             actCode = 0;
         end
         endcase
         end
-        if(counter125hz == 18'b111111111111111111 && !actCode) begin
+        if(counter125hz == 18'b111111111111111111 && actCode==0) begin
             case(rowIndex)
             0: begin
-                kbdNewButton[15:12] = kbdData ^ kbdState[15:12];
+                kbdNewButton[15:12] = (kbdData ^ kbdState[15:12]) & kbdData;
                 kbdState[15:12] = kbdData;
                 kbdCtrl = 4'bZZZ1;
             end
             1: begin
-                kbdNewButton[3:0] = kbdData ^ kbdState[3:0];
+                kbdNewButton[3:0] = (kbdData ^ kbdState[3:0]) & kbdData;
                 kbdState[3:0] = kbdData;
                 kbdCtrl = 4'bZZ1Z;
             end
             2: begin
-                kbdNewButton[7:4] = kbdData ^ kbdState[7:4];
+                kbdNewButton[7:4] = (kbdData ^ kbdState[7:4]) & kbdData;
                 kbdState[7:4] = kbdData;
                 kbdCtrl = 4'bZ1ZZ;
             end
             3: begin
-                kbdNewButton[11:8] = kbdData ^ kbdState[11:8];
+                kbdNewButton[11:8] = (kbdData ^ kbdState[11:8]) & kbdData;
                 kbdState[11:8] = kbdData;
                 kbdCtrl = 4'b1ZZZ;
             end
             endcase
-        end
+            rowIndex = rowIndex + 1;
         case(kbdNewButton)
         16'b0000000000000001: begin
-            pushNum(.num(4'b0001), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
+            pushNum(.num(4'b0001), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
         end
         16'b0000000000000010: begin
-            pushNum(.num(4'b0010), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
+            pushNum(.num(4'b0100), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
         end
         16'b0000000000000100: begin
-            pushNum(.num(4'b0011), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
+            pushNum(.num(4'b0111), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
         end
         16'b0000000000001000: begin
-            actCode = 1;
-        end
-        16'b0000000000010000: begin
-            pushNum(.num(4'b0100), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000000000100000: begin
-            pushNum(.num(4'b0101), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000000001000000: begin
-            pushNum(.num(4'b0110), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000000010000000: begin
-            actCode = 2;
-        end
-        16'b0000000100000000: begin
-            pushNum(.num(4'b0111), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000001000000000: begin
-            pushNum(.num(4'b1000), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000010000000000: begin
-            pushNum(.num(4'b1001), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0000100000000000: begin
-            actCode = 3;
-        end
-        16'b0001000000000000: begin
-            actCode = 4;
-        end
-        16'b0010000000000000: begin
-            pushNum(.num(4'b0000), .stackSize(stackSize), .currentSize(currentSize), .stack(stack));
-        end
-        16'b0100000000000000: begin
-            actCode = 7;
-        end
-        16'b1000000000000000: begin
             actCode = 5;
         end
+        16'b0000000000010000: begin
+            pushNum(.num(4'b0010), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000000000100000: begin
+            pushNum(.num(4'b0101), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000000001000000: begin
+            pushNum(.num(4'b1000), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000000010000000: begin
+            pushNum(.num(4'b0000), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000000100000000: begin
+            pushNum(.num(4'b0011), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000001000000000: begin
+            pushNum(.num(4'b0110), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000010000000000: begin
+            pushNum(.num(4'b1001), .stackSize(stackSize), .currentSize(currentSize), .stack(stack), .overflow(overflow));
+        end
+        16'b0000100000000000: begin
+            actCode = 7;
+        end
+        16'b0001000000000000: begin
+            actCode = 1;
+        end
+        16'b0010000000000000: begin
+            actCode = 2;
+        end
+        16'b0100000000000000: begin
+            actCode = 3;
+        end
+        16'b1000000000000000: begin
+            actCode = 4;
+        end
         endcase
+        if(overflow) actCode = 6;
         if(actCode == 0) begin
             outputCache[3:0] = stack[stackSize][3:0];
             outputCache[7:4] = stack[stackSize][7:4];
@@ -219,5 +220,6 @@ module main(input clock, input [3:0] kbdData, output logic [3:0] kbdCtrl, output
             outputCache[15:12] = stack[stackSize][15:12];
         end
         kbdNewButton = 16'b0;
+        end
     end
 endmodule
